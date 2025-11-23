@@ -8,6 +8,7 @@ using FutureHub.Web.Models.Configuration;
 using FutureHub.Web.Models.DTOs;
 using FutureHub.Web.Repositories.Interfaces;
 using FutureHub.Web.Services.Interfaces;
+using FutureHub.Web.Observability;
 
 namespace FutureHub.Web.Services;
 
@@ -32,12 +33,16 @@ public class AuthService : IAuthService
 
     public async Task<TokenResponse> LoginAsync(LoginDTO dto)
     {
+        using var activity = Tracing.StartActivity("AuthService.LoginAsync");
+        Tracing.AddTag(activity, "user.email", dto.Email);
+        
         _logger.LogInformation("Tentativa de login para email: {Email}", dto.Email);
 
         var usuario = await _usuarioRepository.GetByEmailAsync(dto.Email);
         if (usuario == null)
         {
             _logger.LogWarning("Usuário não encontrado: {Email}", dto.Email);
+            Tracing.AddEvent(activity, "Usuário não encontrado");
             throw new UnauthorizedAccessException("Email ou senha inválidos");
         }
 
@@ -45,11 +50,14 @@ public class AuthService : IAuthService
         if (!BCrypt.Net.BCrypt.Verify(dto.Senha, usuario.SenhaHash))
         {
             _logger.LogWarning("Senha incorreta para usuário: {Email}", dto.Email);
+            Tracing.AddEvent(activity, "Senha incorreta");
             throw new UnauthorizedAccessException("Email ou senha inválidos");
         }
 
         var token = GenerateJwtToken(usuario);
         _logger.LogInformation("Login realizado com sucesso: {Email}", dto.Email);
+        Tracing.AddTag(activity, "user.id", usuario.Id);
+        Tracing.AddEvent(activity, "Login bem-sucedido");
 
         return new TokenResponse
         {

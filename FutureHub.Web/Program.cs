@@ -3,14 +3,34 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using FutureHub.Web.Data;
 using FutureHub.Web.Repositories;
 using FutureHub.Web.Repositories.Interfaces;
 using FutureHub.Web.Services;
 using FutureHub.Web.Services.Interfaces;
 using FutureHub.Web.Models.Configuration;
+using FutureHub.Web.Observability;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configurar OpenTelemetry Tracing
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource
+        .AddService("FutureHub.Api"))
+    .WithTracing(tracing => tracing
+        .AddSource(Tracing.ActivitySource.Name)
+        .AddAspNetCoreInstrumentation(options =>
+        {
+            options.RecordException = true;
+        })
+        .AddHttpClientInstrumentation()
+        .AddOtlpExporter(options =>
+        {
+            options.Endpoint = new Uri("http://localhost:4318/v1/traces");
+            options.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.HttpProtobuf;
+        }));
 
 // Configurar JWT Settings
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));

@@ -2,6 +2,7 @@ using FutureHub.Web.Models;
 using FutureHub.Web.Models.DTOs;
 using FutureHub.Web.Repositories.Interfaces;
 using FutureHub.Web.Services.Interfaces;
+using FutureHub.Web.Observability;
 
 namespace FutureHub.Web.Services;
 
@@ -45,6 +46,11 @@ public class AvaliacaoService : IAvaliacaoService
 
     public async Task<AvaliacaoDTO> CreateAsync(AvaliacaoCreateDTO dto, string userId)
     {
+        using var activity = Tracing.StartActivity("AvaliacaoService.CreateAsync");
+        Tracing.AddTag(activity, "user.id", userId);
+        Tracing.AddTag(activity, "ideia.id", dto.IdeiaId);
+        Tracing.AddTag(activity, "avaliacao.nota", dto.Nota.ToString());
+        
         _logger.LogInformation("Criando avaliação para ideia: {IdeiaId} pelo usuário: {UserId}", dto.IdeiaId, userId);
 
         // Validar se ideia existe e carregar com autor
@@ -52,6 +58,7 @@ public class AvaliacaoService : IAvaliacaoService
         if (ideia == null)
         {
             _logger.LogWarning("Ideia não encontrada: {IdeiaId}", dto.IdeiaId);
+            Tracing.AddEvent(activity, "Ideia não encontrada");
             throw new InvalidOperationException("Ideia não encontrada");
         }
 
@@ -65,6 +72,8 @@ public class AvaliacaoService : IAvaliacaoService
 
         var created = await _avaliacaoRepository.CreateAsync(avaliacao);
         _logger.LogInformation("Avaliação criada com sucesso: {Id}", created.Id);
+        Tracing.AddTag(activity, "avaliacao.id", created.Id);
+        Tracing.AddEvent(activity, "Avaliação criada");
 
         // Atualizar média e total de avaliações da ideia
         await AtualizarEstatisticasIdeiaAsync(dto.IdeiaId);

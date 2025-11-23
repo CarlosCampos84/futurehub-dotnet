@@ -2,6 +2,7 @@ using FutureHub.Web.Models;
 using FutureHub.Web.Models.DTOs;
 using FutureHub.Web.Repositories.Interfaces;
 using FutureHub.Web.Services.Interfaces;
+using FutureHub.Web.Observability;
 
 namespace FutureHub.Web.Services;
 
@@ -66,6 +67,10 @@ public class IdeiaService : IIdeiaService
 
     public async Task<IdeiaDTO> CreateAsync(IdeiaCreateDTO dto, string autorId)
     {
+        using var activity = Tracing.StartActivity("IdeiaService.CreateAsync");
+        Tracing.AddTag(activity, "autor.id", autorId);
+        Tracing.AddTag(activity, "ideia.titulo", dto.Titulo);
+        
         _logger.LogInformation("Criando nova ideia para usuário: {UsuarioId}", autorId);
 
         var ideia = new Ideia
@@ -78,6 +83,8 @@ public class IdeiaService : IIdeiaService
 
         var created = await _ideiaRepository.CreateAsync(ideia);
         _logger.LogInformation("Ideia criada com sucesso: {Id}", created.Id);
+        Tracing.AddTag(activity, "ideia.id", created.Id);
+        Tracing.AddEvent(activity, "Ideia criada");
 
         // Atualizar ranking do usuário
         await _rankingService.AtualizarRankingAsync(autorId);
