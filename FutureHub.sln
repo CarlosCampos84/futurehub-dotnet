@@ -5,8 +5,6 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FutureHub.Web", "FutureHub.Web\FutureHub.Web.csproj", "{21853F2B-F6BF-46C7-B8D9-429FEC970306}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FutureHub.MachineLearning", "FutureHub.MachineLearning\FutureHub.MachineLearning.csproj", "{9C4ED338-E6FE-4E81-BA69-F990253783E0}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FutureHub.Testes", "FutureHub.Testes\FutureHub.Testes.csproj", "{6F9B0C2B-F487-47F7-AC60-67E182BCA019}"
 EndProject
 Global
