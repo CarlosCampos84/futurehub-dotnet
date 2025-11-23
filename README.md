@@ -1065,8 +1065,8 @@ futurehub-dotnet/
 
 ## 👥 Equipe
 
-- NOME | RMXXXXXX
-- NOME | RMXXXXXX
-- NOME | RMXXXXXX
+- Carlos Ferraz | RM555223
+- Antonio Junior | RM554518
+- Caio Henrique | RM554600
 
 
