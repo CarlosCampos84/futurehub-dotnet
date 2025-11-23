@@ -1,8 +1,15 @@
+using Microsoft.EntityFrameworkCore;
+using FutureHub.Web.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
+// Configurar DbContext com Oracle
+builder.Services.AddDbContext<OracleDbContext>(options =>
+    options.UseOracle(builder.Configuration.GetConnectionString("OracleConnection")));
 
 var app = builder.Build();
 
