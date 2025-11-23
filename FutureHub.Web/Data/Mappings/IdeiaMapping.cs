@@ -34,10 +34,6 @@ public class IdeiaMapping : IEntityTypeConfiguration<Ideia>
             .HasMaxLength(36)
             .IsRequired();
 
-        builder.Property(i => i.MissaoId)
-            .HasColumnName("MISSAO_ID")
-            .HasMaxLength(36);
-
         builder.Property(i => i.MediaNotas)
             .HasColumnName("MEDIA_NOTAS")
             .HasPrecision(3, 2)
